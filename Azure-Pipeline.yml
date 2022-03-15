@@ -1,0 +1,41 @@
+
+# ................
+
+trigger:
+  - master
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+  - task: vijayzipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+    displayName: 'Install Terraform 0.12.29'
+    inputs:
+      terraformVersion: 0.12.29
+
+  - task: vijayzipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+    displayName: 'terraform init'
+    inputs:
+      command: init
+      workingDirectory: "DEV/pipeline/"
+      backendType: azurerm
+      backendServiceArm: '<vkdevsvc>'
+      backendAzureRmResourceGroupName: 'RG_BACKEND'
+      backendAzureRmStorageAccountName: storagetfbackendbook
+      backendAzureRmContainerName: tfstate
+      backendAzureRmKey: myappdemopipeline.tfstate
+
+  - task: vijayzipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+    displayName: 'terraform plan'
+    inputs:
+      command: plan
+      workingDirectory: "DEV/pipeline/"
+      commandOptions: '-out="out.tfplan"'
+
+
+  - task: vijayzipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+    displayName: 'terraform apply'
+    inputs:
+      command: apply
+      workingDirectory: "DEV/pipeline/"
+      commandOptions: 'out.tfplan'
